@@ -68,22 +68,173 @@ E2 = ("e2", "escaneador")
 E3 = ("e3", "escaneador")
 S1 = ("s1", "soporte")
 S2 = ("s2", "soporte")
-# ejemplos de minas
-MICRO_TUNEL = ((5, 1), )
+
+# ejemplos de minas super simples
+
+# e[]
+MINA_UN_CASILLERO = ((5, 1), )
+
+# e[][][][][][]
+MINA_TUNEL_RECTO = (
+    (5, 1), (5, 2), (5, 3), (5, 4), (5, 5), (5, 6),
+)
+
+#    1 2 3 4
+# 5 e[][][][]
+# 6  [][][][]
+MINA_TUNEL_ANCHO = (
+    (5, 1), (5, 2), (5, 3), (5, 4),
+    (6, 1), (6, 2), (6, 3), (6, 4),
+)
+
+#    1 2 3
+# 3      []
+# 4      []
+# 5 e[][][]
+MINA_L = (
+    (3, 3),
+    (4, 3),
+    (5, 1), (5, 2), (5, 3),
+)
+
+#    1 2 3
+# 3      []
+# 4      []
+# 5 e[][][]
+# 6      []
+# 7      []
+MINA_T = (
+    (3, 3),
+    (4, 3),
+    (5, 1), (5, 2), (5, 3),
+    (6, 3),
+    (7, 3),
+)
+
+# estas minas requieren recarga o múltiples robots sin recarga
+
+#    1 2 3 4 5
+# 3      []
+# 4      []
+# 5 e[][][][][]
+# 6      []
+# 7      []
+MINA_CRUZ = (
+    (3, 3),
+    (4, 3),
+    (5, 1), (5, 2), (5, 3), (5, 4), (5, 5),
+    (6, 3),
+    (7, 3),
+)
+
+#    1 2 3 4
+# 3    [][][]
+# 4    []
+# 5 e[][][][]
+# 6    []
+# 7    [][][]
+MINA_E = (
+    (3, 2), (3, 3), (3, 4),
+    (4, 2),
+    (5, 1), (5, 2), (5, 3), (5, 4),
+    (6, 2),
+    (7, 2), (7, 3), (7, 4),
+)
+
+#    1 2 3 4 5
+# 3    [][][][]
+# 4    []    []
+# 5 e[][][][][]
+# 6    []    []
+# 7    [][][][]
+MINA_OCHO = (
+    (3, 2), (3, 3), (3, 4), (3, 5),
+    (4, 2), (4, 5),
+    (5, 1), (5, 2), (5, 3), (5, 4), (5, 5),
+    (6, 2), (6, 5),
+    (7, 2), (7, 3), (7, 4), (7, 5),
+)
+
+# estas minas ya son más complicadas
+
+#    1 2 3 4 5 6 7 8 9 10
+# 3    [][][][]
+# 4    []    [][]
+# 5 e[][][][][]    []
+# 6    []    []    [][][]
+# 7    [][][][][][][]
+MINA_MEDIANA = (
+    (3, 2), (3, 3), (3, 4), (3, 5),
+    (4, 2), (4, 5), (4, 6),
+    (5, 1), (5, 2), (5, 3), (5, 4), (5, 5), (5, 8),
+    (6, 2), (6, 5), (6, 8), (6, 9), (6, 10),
+    (7, 2), (7, 3), (7, 4), (7, 5), (7, 6), (7, 7), (7, 8),
+)
+
+#    1 2 3 4 5 6 7 8 9 10
+# 2      [][][][][][]
+# 3    [][][][]    [][]
+# 4    []    [][]
+# 5 e[][][][][]    []
+# 6    []    []  [][][][]
+# 7    [][][][][][][]  []
+# 8    []  []      []
+# 9        [][][]
+MINA_GRANDE = (
+    (2, 3), (2, 4), (2, 5), (2, 6), (2, 7), (2, 8),
+    (3, 2), (3, 3), (3, 4), (3, 5), (3, 8), (3, 9),
+    (4, 2), (4, 5), (4, 6),
+    (5, 1), (5, 2), (5, 3), (5, 4), (5, 5), (5, 8),
+    (6, 2), (6, 5), (6, 7), (6, 8), (6, 9), (6, 10),
+    (7, 2), (7, 3), (7, 4), (7, 5), (7, 6), (7, 7), (7, 8), (7, 10),
+    (8, 2), (8, 4), (8, 8),
+    (9, 4), (9, 5), (9, 6),
+)
+
+
 
 @pytest.mark.dependency(depends=["test_funcion_bien_definida"])
 @pytest.mark.parametrize("tuneles,robots,pasos_esperados,limite_segs", (
     # casos super básicos
 
     # micro tunel de un solo casillero, un solo robot escaneador
-    (MICRO_TUNEL, (E1, ), 1, 3),
+    pytest.param(MINA_UN_CASILLERO, (E1, ), 1, 3, id="1_casillero_1_explorador"),
     # micro tunel de un solo casillero, un robot de cada tipo
-    (MICRO_TUNEL, (E1, S1), 1, 3),
+    pytest.param(MINA_UN_CASILLERO, (E1, S1), 1, 3, id="1_casillero_1_explorador_1_soporte"),
     # micro tunel de un solo casillero, dos robots escaneadores
-    (MICRO_TUNEL, (E1, E2), 1, 3),
+    pytest.param(MINA_UN_CASILLERO, (E1, E2), 1, 3, id="1_casillero_2_exploradores"),
 
-    # casos grandes! (pendiente, vamos a estar agregando)
-    # (DIBUJO_CONSIGNA, (E1, S1), None, None),
+    # casos chicos
+    pytest.param(MINA_TUNEL_RECTO, (E1, ), 6, 3, id="tunel_recto_1_explorador"),
+    pytest.param(MINA_TUNEL_RECTO, (E1, S1), 6, 3, id="tunel_recto_1_explorador_1_soporte"),
+    pytest.param(MINA_TUNEL_RECTO, (E1, E2), 6, 3, id="tunel_recto_2_exploradores"),
+    pytest.param(MINA_TUNEL_ANCHO, (E1, ), 8, 3, id="tunel_ancho_1_explorador"),
+    pytest.param(MINA_TUNEL_ANCHO, (E1, S1), 8, 3, id="tunel_ancho_1_explorador_1_soporte"),
+    pytest.param(MINA_TUNEL_ANCHO, (E1, E2), 8, 3, id="tunel_ancho_2_exploradores"),
+    pytest.param(MINA_L, (E1, ), 5, 3, id="mina_L_1_explorador"),
+    pytest.param(MINA_L, (E1, S1), 5, 3, id="mina_L_1_explorador_1_soporte"),
+    pytest.param(MINA_L, (E1, E2), 5, 3, id="mina_L_2_exploradores"),
+    pytest.param(MINA_T, (E1, ), 9, 3, id="mina_T_1_explorador"),
+    pytest.param(MINA_T, (E1, S1), 9, 3, id="mina_T_1_explorador_1_soporte"),
+    pytest.param(MINA_T, (E1, E2), 9, 3, id="mina_T_2_exploradores"),
+
+    # ejemplos chicos pero ya requiriendo recarga con robot de soporte, o
+    # dos robots sin recarga
+    pytest.param(MINA_CRUZ, (E1, S1), 18, 5, id="mina_cruz_1_explorador_1_soporte"),
+    pytest.param(MINA_CRUZ, (E1, E2), 14, 5, id="mina_cruz_2_exploradores"),
+    pytest.param(MINA_E, (E1, S1), 23, 5, id="mina_E_1_explorador_1_soporte"),
+    pytest.param(MINA_E, (E1, E2), 16, 5, id="mina_E_2_exploradores"),
+    pytest.param(MINA_OCHO, (E1, S1), 23, 5, id="mina_8_1_explorador_1_soporte"),
+    pytest.param(MINA_OCHO, (E1, E2), 20, 5, id="mina_8_2_exploradores"),
+
+    # casos medianos
+    pytest.param(MINA_MEDIANA, (E1, S1), 48, 15, id="mina_mediana_1_explorador_1_soporte"),
+    pytest.param(MINA_MEDIANA, (E1, E2, S1), 45, 15, id="mina_mediana_2_exploradores_1_soporte"),
+
+    # casos grandes
+    pytest.param(MINA_MEDIANA, (E1, E2, E3, S1, S2), 44, 60, id="mina_mediana_3_exploradores_2_soportes"),
+    pytest.param(MINA_GRANDE, (E1, S1), 126, 30, id="mina_grande_1_explorador_1_soporte"),
+
 ))
 def test_plan_es_correcto(planear_escaneo, tuneles, robots, pasos_esperados, limite_segs):
     mensaje_si_demora = (f"La prueba con tuneles {tuneles} y robots {robots} demoró demasiado "
@@ -105,7 +256,7 @@ def test_plan_es_correcto(planear_escaneo, tuneles, robots, pasos_esperados, lim
         id_robot: {
             "tipo": tipo_robot,
             "coords": ENTRADA,
-            "carga": 2500,
+            "carga": 1000,
         }
         for id_robot, tipo_robot in robots
     }
@@ -140,7 +291,7 @@ def test_plan_es_correcto(planear_escaneo, tuneles, robots, pasos_esperados, lim
                 assert estado_actual[id_robot]["carga"] >= 0, f"El paso {numero_paso} dejaría a un robot con carga de batería negativa: {id_robot}"
                 try:
                     tuneles_pendientes.remove(target_accion)
-                except ValueError:
+                except KeyError:
                     pass
         elif tipo_accion == "cargar":
             estado_actual[target_accion]["carga"] = 2500
