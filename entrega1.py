@@ -15,17 +15,19 @@ def convertir_a_tuplas(listas):
 
 def planear_escaneo(tuneles, robots):
 
-    # El estado es una tupla de tuplas con el tipo de robot, la posición que también es tupla 
+    # El estado es una tupla con una lista de tuplas de los túneles recorridos y 
+    # con una lista de tuplas con el tipo de robot, la posición que también es tupla 
     # y si es mapeador la batería actual
-    estado_inicial = []
+    estado_inicial = ([],[])
+
     for robot in robots:
         if(robot[1] == 'escaneador'):
             tupla = (robot[0], (5,0), 1000)
         else:
             tupla = (robot[0], (5,0))
-        estado_inicial.append(tupla)
+        estado_inicial[1].append(tupla)
         
-    estado_tupla = tuple(estado_inicial)
+    estado_tupla = convertir_a_tuplas(estado_inicial)
 
 
     # Clase problem
@@ -45,7 +47,9 @@ def planear_escaneo(tuneles, robots):
             # destino accion: posición a moverse (1,1) o el robot a cargar (e1)
             acciones_disponibles = []
 
-            for elemento in state:
+            tuneles_recorridos, estado = state
+
+            for elemento in estado:
                 
                 # Si el largo de elemento es 3 siginfica que es escaneador (el tercer dato es la batería)
                 if len(elemento) == 3:
@@ -80,17 +84,17 @@ def planear_escaneo(tuneles, robots):
                     
                     # Generar acciones de tipo carga con los robots escaneadores que necesitan carga y 
                     # están en la misma posición que el robot de soporte 
-                    for objeto in state:
+                    for objeto in estado:
                         if len(objeto) == 3 and objeto[1] == posicion and objeto[2] < 1000:
                             acciones_disponibles.append((robot, 'cargar', objeto[0]))
 
             return acciones_disponibles
 
-        # Lista de los túneles que van recorriendo los robots
-        tuneles_recorridos = []
-
         def result(self, state, action):
-            estado_lista = convertir_a_listas(state)
+            tuneles_recorridos, estado_lista = state
+            tuneles_recorridos = list(tuneles_recorridos)
+            estado_lista = convertir_a_listas(estado_lista)
+            
             robot, tipo_accion, destino_accion = action
 
             if(tipo_accion == 'mover'):
@@ -104,8 +108,8 @@ def planear_escaneo(tuneles, robots):
                             
                             # Agregar la coordenada del tunel que se está escaneando a 
                             # la lista de tuneles recorridos
-                            if destino_accion not in self.tuneles_recorridos:
-                                self.tuneles_recorridos.append(destino_accion)
+                            if destino_accion not in tuneles_recorridos:
+                                tuneles_recorridos.append(destino_accion)
             else:
                     # Si el tipo de acción es cargar, modifico en el estado la batería del robot
                     # al que se quiere cargar a 1000
@@ -113,19 +117,22 @@ def planear_escaneo(tuneles, robots):
                         if elemento[0] == destino_accion:
                             elemento[2] = 1000        
             
+            tuneles_recorridos = tuple(tuneles_recorridos)
             estado_tupla = convertir_a_tuplas(estado_lista)
 
-            return  estado_tupla
+            return (tuneles_recorridos, estado_tupla)
         
         def is_goal(self, state):
             # Retornar true si el largo de túneles recorridos y túneles es igual,
             # lo que significa que se escanearon todas las posiciones del túnel
-            condicion = len(self.tuneles_recorridos) == len(tuneles)
+            tuneles_recorridos, estado_lista = state
+            condicion = len(tuneles_recorridos) == len(tuneles)
             return condicion
         
         def heuristic(self, state):
             # La heurística es la cantidad de túneles que faltan recorrer multiplicados por 1 minuto
-            tiempo = [len(tuneles) - len(self.tuneles_recorridos)] * 1
+            tuneles_recorridos, estado_lista = state
+            tiempo = (len(tuneles) - len(tuneles_recorridos)) * 1
             return tiempo
 
         
@@ -135,9 +142,9 @@ def planear_escaneo(tuneles, robots):
 
     plan = []
 
-    for action in result.path():
-        accion = action
-        plan.append(action)
+    for action, state in result.path():
+        if (action is not None):
+            plan.append(action)
 
     return plan
 
@@ -153,8 +160,8 @@ def planear_escaneo(tuneles, robots):
 #             ("s2", "soporte"))
 
 
-tuneles = ( (5, 1), )
+# tuneles = ( (5, 1), )
 
-robots = ( ("e1", "escaneador"),  )
+# robots = ( ("e1", "escaneador"),  )
 
-resultado = planear_escaneo(tuneles, robots)
+# resultado = planear_escaneo(tuneles, robots)
