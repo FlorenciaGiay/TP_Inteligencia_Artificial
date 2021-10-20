@@ -94,30 +94,45 @@ def planear_escaneo(tuneles, robots):
             estado_robots = convertir_a_listas(estado_robots)
             
             # Desglosar la información de la acción
-            robot, tipo_accion, destino_accion = action
+            id_robot, tipo_accion, destino_accion = action
 
             if(tipo_accion == 'mover'):
-                # Modificar el estado asignándole al robot correspondiente la nueva posición
-                for indice, robot_a_mover in enumerate(estado_robots):
-                    # indice = robot_a_mover[0]
-                    
-                    if robot_a_mover[0] == robot:
-                        estado_robots[indice][1] = destino_accion
-                        
-                        # Si es escaneador restar 100 a la batería
-                        if robot_a_mover[2] != 2000:
-                            estado_robots[indice][2] -= 100
+                robot_mover_en_lista = list(filter(lambda robot: robot[1][0] == id_robot, enumerate(estado_robots)))
+                robot_mover = robot_mover_en_lista[0]
+                idx_robot_mover = robot_mover[0]
+                estado_robots[idx_robot_mover][1] = destino_accion
 
-                            # Eliminar la coordenada del túnel que se está escaneando de 
-                            # la lista de tuneles pendientes
-                            if destino_accion in tuneles_pendientes:
+                if(robot_mover[1][2] != 2000):
+                     estado_robots[idx_robot_mover][2] -= 100
+                     if destino_accion in tuneles_pendientes:
                                 tuneles_pendientes.remove(destino_accion)
             else:
-                # Si el tipo de acción es cargar, modificar la batería del robot que se quiere cargar a 1000
-                for indice, robot_a_cargar in enumerate(estado_robots):
-                    # indice = robot_a_cargar[0]
-                    if robot_a_cargar[0] == destino_accion:
-                        estado_robots[indice][2] = 1000        
+                robot_cargar_en_lista = list(filter(lambda robot: robot[1][0] == destino_accion, enumerate(estado_robots)))
+                robot_cargar = robot_cargar_en_lista[0]
+                idx_robot_cargar = robot_cargar[0]
+                estado_robots[idx_robot_cargar][2] = 1000
+
+            #     # Modificar el estado asignándole al robot correspondiente la nueva posición
+            #     for indice, robot_a_mover in enumerate(estado_robots):
+            #         # indice = robot_a_mover[0]
+                    
+            #         if robot_a_mover[0] == id_robot:
+            #             estado_robots[indice][1] = destino_accion
+                        
+            #             # Si es escaneador restar 100 a la batería
+            #             if robot_a_mover[2] != 2000:
+            #                 estado_robots[indice][2] -= 100
+
+            #                 # Eliminar la coordenada del túnel que se está escaneando de 
+            #                 # la lista de tuneles pendientes
+            #                 if destino_accion in tuneles_pendientes:
+            #                     tuneles_pendientes.remove(destino_accion)
+            # else:
+            #     # Si el tipo de acción es cargar, modificar la batería del robot que se quiere cargar a 1000
+            #     for indice, robot_a_cargar in enumerate(estado_robots):
+            #         # indice = robot_a_cargar[0]
+            #         if robot_a_cargar[0] == destino_accion:
+            #             estado_robots[indice][2] = 1000        
                 
             tuneles_pendientes = tuple(tuneles_pendientes)
             estado_robots = convertir_a_tuplas(estado_robots)
@@ -186,7 +201,7 @@ def planear_escaneo(tuneles, robots):
 #     (7, 3),
 # )
 
-# robots = ( ("e1", "escaneador"), ("s1", "soporte"),  )
+# robots = ( ("e1", "escaneador"), ("e2", "explorador"),  )
 
 
 # resultado = planear_escaneo(tuneles, robots)
