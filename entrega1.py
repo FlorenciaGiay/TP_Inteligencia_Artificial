@@ -1,11 +1,6 @@
 from simpleai.search import (
     SearchProblem,
-    breadth_first,
-    depth_first,
-    uniform_cost,
-    limited_depth_first,
-    iterative_limited_depth_first,
-    # informed search
+    # Búsqueda informada
     greedy,
     astar,
 )
@@ -137,24 +132,24 @@ def planear_escaneo(tuneles, robots):
         
         def heuristic(self, state):
             # La heurística es la cantidad de túneles que faltan recorrer multiplicados por 1 minuto
-            # tuneles_recorridos, estado_robots = state
-            # return (len(tuneles) - len(tuneles_recorridos)) * 1
-            
             tuneles_recorridos, estado_robots = state
+            return (len(tuneles) - len(tuneles_recorridos)) * 1
+            
+            # tuneles_recorridos, estado_robots = state
 
-            robots_bateria_cero = 0
-            cantidad_robots = len(estado_robots)
+            # robots_bateria_cero = 0
+            # cantidad_robots = len(estado_robots)
 
-            for robot in estado_robots:
-                if(robot[2]<100):
-                    robots_bateria_cero = robots_bateria_cero + 1
+            # for robot in estado_robots:
+            #     if(robot[2]<100):
+            #         robots_bateria_cero = robots_bateria_cero + 1
 
-            costo = (len(tuneles) - len(tuneles_recorridos)) * 1
-            # Si todos los robots quedaron en menos de 100 de bateria y todavia no se recorrieron los tuneles minimo una vez se tiene que cargar un robot
-            if (robots_bateria_cero == cantidad_robots and len(tuneles) != len(tuneles_recorridos)):
-                costo = costo + 5
+            # costo = (len(tuneles) - len(tuneles_recorridos)) * 1
+            # # Si todos los robots quedaron en menos de 100 de bateria y todavia no se recorrieron los tuneles minimo una vez se tiene que cargar un robot
+            # if (robots_bateria_cero == cantidad_robots and len(tuneles) != len(tuneles_recorridos)):
+            #     costo = costo + 5
 
-            return costo
+            # return costo
 
         
     problema = ExploracionRobotica(estado_inicial)
@@ -183,17 +178,17 @@ def planear_escaneo(tuneles, robots):
 #             ("s2", "soporte"))
 
 
-tuneles = (
-    (3, 3),
-    (4, 3),
-    (5, 1), (5, 2), (5, 3), (5, 4), (5, 5),
-    (6, 3),
-    (7, 3),
-)
+# tuneles = (
+#     (3, 3),
+#     (4, 3),
+#     (5, 1), (5, 2), (5, 3), (5, 4), (5, 5),
+#     (6, 3),
+#     (7, 3),
+# )
 
-robots = ( ("e1", "escaneador"), ("s1", "soporte"),  )
+# robots = ( ("e1", "escaneador"), ("s1", "soporte"),  )
 
 
-resultado = planear_escaneo(tuneles, robots)
+# resultado = planear_escaneo(tuneles, robots)
 
-print(resultado)
+# print(resultado)
