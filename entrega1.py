@@ -1,5 +1,11 @@
 from simpleai.search import (
     SearchProblem,
+    breadth_first,
+    depth_first,
+    uniform_cost,
+    limited_depth_first,
+    iterative_limited_depth_first,
+    # informed search
     greedy,
     astar,
 )
@@ -75,10 +81,10 @@ def planear_escaneo(tuneles, robots):
                 if(bateria == 2000):
                     for robot_a_cargar in estado_robots:
                         # Desglosar la información de los robots a cargar
-                        id_robot_a_cargar, posicion_a_cargar, bateria_a_cargar = robot_a_cargar
+                        # id_robot_a_cargar, posicion_a_cargar, bateria_a_cargar = robot_a_cargar
 
-                        if posicion_a_cargar == posicion and bateria_a_cargar < 1000:
-                            acciones_disponibles.append((id_robot, 'cargar', id_robot_a_cargar))
+                        if robot_a_cargar[1] == posicion and robot_a_cargar[2] < 1000:
+                            acciones_disponibles.append((id_robot, 'cargar', robot_a_cargar[0]))
 
             return acciones_disponibles
 
@@ -97,24 +103,27 @@ def planear_escaneo(tuneles, robots):
 
             if(tipo_accion == 'mover'):
                 # Modificar el estado asignándole al robot correspondiente la nueva posición
-                for robot_a_mover in estado_robots:
-                    if robot_a_mover[0] == robot:
-                        robot_a_mover[1] = destino_accion
+                for robot_a_mover in enumerate(estado_robots):
+                    indice = robot_a_mover[0]
+                    
+                    if robot_a_mover[1][0] == robot:
+                        estado_robots[indice][1] = destino_accion
                         
                         # Si es escaneador restar 100 a la batería
-                        if robot_a_mover[2] != 2000: 
-                            robot_a_mover[2] = robot_a_mover[2] - 100
+                        if robot_a_mover[1][2] != 2000:
+                            estado_robots[indice][2] -= 100
 
                             # Agregar la coordenada del túnel que se está escaneando a 
                             # la lista de tuneles recorridos
                             if destino_accion not in tuneles_recorridos:
                                 tuneles_recorridos.append(destino_accion)
             else:
-                    # Si el tipo de acción es cargar, modificar la batería del robot que se quiere cargar a 1000
-                    for robot_a_cargar in estado_robots:
-                        if robot_a_cargar[0] == destino_accion:
-                            robot_a_cargar[2] = 1000        
-            
+                # Si el tipo de acción es cargar, modificar la batería del robot que se quiere cargar a 1000
+                for robot_a_cargar in enumerate(estado_robots):
+                    indice = robot_a_cargar[0]
+                    if robot_a_cargar[1][0] == destino_accion:
+                        estado_robots[indice][2] = 1000        
+                
             tuneles_recorridos = tuple(tuneles_recorridos)
             estado_robots = convertir_a_tuplas(estado_robots)
 
@@ -128,13 +137,29 @@ def planear_escaneo(tuneles, robots):
         
         def heuristic(self, state):
             # La heurística es la cantidad de túneles que faltan recorrer multiplicados por 1 minuto
+            # tuneles_recorridos, estado_robots = state
+            # return (len(tuneles) - len(tuneles_recorridos)) * 1
+            
             tuneles_recorridos, estado_robots = state
-            return (len(tuneles) - len(tuneles_recorridos)) * 1
+
+            robots_bateria_cero = 0
+            cantidad_robots = len(estado_robots)
+
+            for robot in estado_robots:
+                if(robot[2]<100):
+                    robots_bateria_cero = robots_bateria_cero + 1
+
+            costo = (len(tuneles) - len(tuneles_recorridos)) * 1
+            # Si todos los robots quedaron en menos de 100 de bateria y todavia no se recorrieron los tuneles minimo una vez se tiene que cargar un robot
+            if (robots_bateria_cero == cantidad_robots and len(tuneles) != len(tuneles_recorridos)):
+                costo = costo + 5
+
+            return costo
 
         
     problema = ExploracionRobotica(estado_inicial)
 
-    resultado = greedy(problema, graph_search=True)
+    resultado = astar(problema, graph_search=True)
 
     plan = []
 
