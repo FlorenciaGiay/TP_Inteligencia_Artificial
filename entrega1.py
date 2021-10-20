@@ -152,16 +152,23 @@ def planear_escaneo(tuneles, robots):
             
             # tuneles_pendientes, estado_robots = state
 
-            # robots_bateria_cero = 0
-            # cantidad_robots = len(estado_robots)
+            # robots_bateria_menor_cien = 0
+            # cantidad_escaneadores = 0
+            # cantidad_soporte = 0
 
             # for robot in estado_robots:
             #     if(robot[2]<100):
-            #         robots_bateria_cero = robots_bateria_cero + 1
+            #         robots_bateria_menor_cien += 1
+            #     if(robot[2]!=2000):
+            #         cantidad_escaneadores += 1
+            #     else:
+            #         cantidad_soporte += 1
 
-            # costo = (len(tuneles) - len(tuneles_pendientes)) * 1
-            # # Si todos los robots quedaron en menos de 100 de bateria y todavia no se recorrieron los tuneles minimo una vez se tiene que cargar un robot
-            # if (robots_bateria_cero == cantidad_robots and len(tuneles) != len(tuneles_pendientes)):
+            # costo = len(tuneles_pendientes) * 1
+            # # Si todos los robots escaneadores quedaron en menos de 100 de bateria, 
+            # # por lo menos hay un soporte y todavía no se recorrieron los túneles,
+            # #  mínimo una vez se tiene que cargar un robot
+            # if (costo != 0 and robots_bateria_menor_cien == cantidad_escaneadores and cantidad_soporte > 0):
             #     costo = costo + 5
 
             # return costo
@@ -201,7 +208,7 @@ def planear_escaneo(tuneles, robots):
 #     (7, 3),
 # )
 
-# robots = ( ("e1", "escaneador"), ("e2", "explorador"),  )
+# robots = ( ("e1", "escaneador"), ("e2", "escaneador"),  )
 
 
 # resultado = planear_escaneo(tuneles, robots)
