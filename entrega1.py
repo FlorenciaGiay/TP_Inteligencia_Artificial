@@ -1,11 +1,7 @@
 from simpleai.search import (
     SearchProblem,
-    # Búsqueda informada
-    greedy,
     astar,
 )
-
-from simpleai.search.viewers import WebViewer, BaseViewer
 
 # Método para convertir tuplas a listas  
 def convertir_a_listas(tuplas):
@@ -15,12 +11,12 @@ def convertir_a_listas(tuplas):
 def convertir_a_tuplas(listas):
     return tuple([tuple(x) for x in listas])
 
-
 def planear_escaneo(tuneles, robots):
 
     # El estado inicial es una tupla que contiente:
     # - una tupla de tuplas de los túneles pendientes de recorrer 
-    # - una tupla de tuplas con el tipo de robot, la posición que también es tupla, y la batería (1000 escaneadores, 2000 soporte)
+    # - una tupla de tuplas con el tipo de robot, la posición que también es tupla, 
+    # y la batería (1000 escaneadores, 2000 soporte)
 
     # El segundo elemento del estado inicial es una lista ya que se debe modificar
     
@@ -48,10 +44,10 @@ def planear_escaneo(tuneles, robots):
         def actions(self, state):
             # Las acciones son tuplas de 3 elementos: (robot, tipo_accion, destino_accion)
             # tipo_accion: mover o cargar
-            # destino accion: posición a moverse (1,1) o el robot a cargar (e1)
+            # destino_accion: posición a moverse (1,1) o el robot a cargar (e1)
             acciones_disponibles = []
 
-            # Desglosar el estado en los tuneles pendientes y en los robots con su información
+            # Desglosar el estado en los túneles pendientes y en los robots con su información
             tuneles_pendientes, estado_robots = state
 
             for robot in estado_robots:
@@ -59,6 +55,7 @@ def planear_escaneo(tuneles, robots):
                 # Desglosar la información de los robots
                 id_robot, posicion, bateria = robot
                 
+                # Generar las posiciones adyacentes a la posición actual del robot 
                 if bateria >= 100:
                     posiciones_posibles = []
                     posiciones_posibles.append((posicion[0]-1, posicion[1]))
@@ -72,12 +69,10 @@ def planear_escaneo(tuneles, robots):
                             acciones_disponibles.append((id_robot, 'mover', posicion_posible))
 
                 # Si el robot es de soporte (batería = 2000) generar acciones de tipo carga 
-                # para los robots escaneadores que necesitan carga y están en la misma posición que el de soporte 
+                # para los robots escaneadores que necesitan carga y están en la misma posición 
+                # que el de soporte 
                 if(bateria == 2000):
                     for robot_a_cargar in estado_robots:
-                        # Desglosar la información de los robots a cargar
-                        # id_robot_a_cargar, posicion_a_cargar, bateria_a_cargar = robot_a_cargar
-
                         if robot_a_cargar[1] == posicion and robot_a_cargar[2] < 1000:
                             acciones_disponibles.append((id_robot, 'cargar', robot_a_cargar[0]))
 
@@ -96,44 +91,29 @@ def planear_escaneo(tuneles, robots):
             # Desglosar la información de la acción
             id_robot, tipo_accion, destino_accion = action
 
+            # Si el tipo de acción es mover, 
+            # modificar el estado asignándole al robot correspondiente la nueva posición
             if(tipo_accion == 'mover'):
                 robot_mover_en_lista = list(filter(lambda robot: robot[1][0] == id_robot, enumerate(estado_robots)))
                 robot_mover = robot_mover_en_lista[0]
                 idx_robot_mover = robot_mover[0]
                 estado_robots[idx_robot_mover][1] = destino_accion
 
+                # Si es escaneador (no de soporte) restar 100 a la batería
                 if(robot_mover[1][2] != 2000):
                      estado_robots[idx_robot_mover][2] -= 100
+                    # Eliminar la coordenada del túnel que se está escaneando de 
+                    # la lista de túneles pendientes
                      if destino_accion in tuneles_pendientes:
                                 tuneles_pendientes.remove(destino_accion)
             else:
+                # Si el tipo de acción es cargar, modificar la batería del robot que se quiere cargar a 1000
                 robot_cargar_en_lista = list(filter(lambda robot: robot[1][0] == destino_accion, enumerate(estado_robots)))
                 robot_cargar = robot_cargar_en_lista[0]
                 idx_robot_cargar = robot_cargar[0]
                 estado_robots[idx_robot_cargar][2] = 1000
 
-            #     # Modificar el estado asignándole al robot correspondiente la nueva posición
-            #     for indice, robot_a_mover in enumerate(estado_robots):
-            #         # indice = robot_a_mover[0]
-                    
-            #         if robot_a_mover[0] == id_robot:
-            #             estado_robots[indice][1] = destino_accion
-                        
-            #             # Si es escaneador restar 100 a la batería
-            #             if robot_a_mover[2] != 2000:
-            #                 estado_robots[indice][2] -= 100
-
-            #                 # Eliminar la coordenada del túnel que se está escaneando de 
-            #                 # la lista de tuneles pendientes
-            #                 if destino_accion in tuneles_pendientes:
-            #                     tuneles_pendientes.remove(destino_accion)
-            # else:
-            #     # Si el tipo de acción es cargar, modificar la batería del robot que se quiere cargar a 1000
-            #     for indice, robot_a_cargar in enumerate(estado_robots):
-            #         # indice = robot_a_cargar[0]
-            #         if robot_a_cargar[0] == destino_accion:
-            #             estado_robots[indice][2] = 1000        
-                
+            # Convertir a tuplas los elementos del estado
             tuneles_pendientes = tuple(tuneles_pendientes)
             estado_robots = convertir_a_tuplas(estado_robots)
 
@@ -142,75 +122,23 @@ def planear_escaneo(tuneles, robots):
         def is_goal(self, state):
             # Retornar true si el largo de túneles pendientes es 0,
             # lo que significa que se escanearon todas las posiciones del túnel
-            tuneles_pendientes, estado_robots = state
-            return len(tuneles_pendientes) == 0
+            return len(state[0]) == 0
         
         def heuristic(self, state):
-            # La heurística es la cantidad de túneles que faltan recorrer multiplicados por 1 minuto
-            tuneles_pendientes, estado_robots = state
-            return (len(tuneles_pendientes)) * 1
-            
-            # tuneles_pendientes, estado_robots = state
-
-            # robots_bateria_menor_cien = 0
-            # cantidad_escaneadores = 0
-            # cantidad_soporte = 0
-
-            # for robot in estado_robots:
-            #     if(robot[2]<100):
-            #         robots_bateria_menor_cien += 1
-            #     if(robot[2]!=2000):
-            #         cantidad_escaneadores += 1
-            #     else:
-            #         cantidad_soporte += 1
-
-            # costo = len(tuneles_pendientes) * 1
-            # # Si todos los robots escaneadores quedaron en menos de 100 de bateria, 
-            # # por lo menos hay un soporte y todavía no se recorrieron los túneles,
-            # #  mínimo una vez se tiene que cargar un robot
-            # if (costo != 0 and robots_bateria_menor_cien == cantidad_escaneadores and cantidad_soporte > 0):
-            #     costo = costo + 5
-
-            # return costo
-
-        
+            # La heurística es la cantidad de túneles que faltan recorrer
+            # multiplicados por 1 minuto
+            return (len(state[0])) * 1
+                    
     problema = ExploracionRobotica(estado_inicial)
 
     resultado = astar(problema, graph_search=True)
 
     plan = []
 
-    # Recorrer el resultado agregando a la lista plan, las acciones seleccionadas por el algoritmo
+    # Recorrer el resultado agregando a la lista plan, 
+    # las acciones seleccionadas por el algoritmo
     for action, state in resultado.path():
         # Descartar la primera acción que es None
         if (action is not None):
             plan.append(action)
-
     return plan
-
-
-# Prueba 
-
-# tuneles = ( (5, 1), (5, 2), (5, 3), (5, 4), (5, 5), (5, 6) )
-
-# robots = ( ("e1", "escaneador"), 
-#             ("e2", "escaneador"), 
-#             ("e3", "escaneador"), 
-#             ("s1", "soporte"), 
-#             ("s2", "soporte"))
-
-
-# tuneles = (
-#     (3, 3),
-#     (4, 3),
-#     (5, 1), (5, 2), (5, 3), (5, 4), (5, 5),
-#     (6, 3),
-#     (7, 3),
-# )
-
-# robots = ( ("e1", "escaneador"), ("e2", "escaneador"),  )
-
-
-# resultado = planear_escaneo(tuneles, robots)
-
-# print(resultado)
