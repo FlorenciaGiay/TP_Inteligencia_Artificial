@@ -4,24 +4,29 @@ from simpleai.search import CspProblem, backtrack
 
 # 4 tipos de mejoras
 variables_problema = [ 
-    "Mejora_Bateria",
-    "Mejora_Movilidad",
-    "Mejora_Suministro",
-    "Mejora_Comunicacion"
+    "incrementos_baterias",
+    "mejoras_movimientos",
+    "mejoras_cajas",
+    "mejoras_comunicaciones"
 ]
+
+# Consumo y carga con las que ya cuentan los robots antes de aplicar las mejoras
+consumo_base = 100
+carga_base = 1000
+
 dominios = {}
 
 # Los valores del dominio para mejora batería están conformados por una tupla que contiene:
 # tipo de batería, aumento de batería, aumento del consumo
-dominios["Mejora_Bateria"] = [
-    ("baterias_chicas",5000,10),
-    ("baterias_medianas",7500,20),
-    ("baterias_grandes",10000,50)
+dominios["incrementos_baterias"] = [
+    ("baterias_chicas",4000,10),
+    ("baterias_medianas",6500,20),
+    ("baterias_grandes",9000,50)
     ]
 
 # Los valores del dominio para mejora movilidad están conformados por una tupla que contiene:
 # tipo de movilidad, 0 aumento de batería, aumento de consumo
-dominios["Mejora_Movilidad"] = [
+dominios["mejoras_movimientos"] = [
     ("patas_extras",0,15),
     ("mejores_motores",0,25),
     ("orugas",0,50)
@@ -29,14 +34,14 @@ dominios["Mejora_Movilidad"] = [
 
 # Los valores del dominio para mejora suministro están conformados por una tupla que contiene:     
 # tipo de caja, 0 aumento de batería, aumento de consumo
-dominios["Mejora_Suministro"] = [
+dominios["mejoras_cajas"] = [
     ("caja_superior",0,10),
     ("caja_trasera",0,10)
     ] 
 
 # Los valores del dominio para mejora comunicación están conformados por una tupla que contiene:
 # tipo de comunicación, 0 aumento de batería, aumento del consumo
-dominios["Mejora_Comunicacion"] = [
+dominios["mejoras_comunicaciones"] = [
     ("radios",0,5),
     ("videollamadas",0,10)
     ] 
@@ -94,8 +99,8 @@ restricciones.append((variables_problema,videollamadas_incompatible_con_mejores_
 # Restricción para que la elección de las mejoras cumpla con el objetivo 
 # de que las mejoras sean de al menos 50 minutos
 def autonomia_es_suficiente(variables, values):
-    carga = sum(mejora[1] for mejora in values)
-    consumo = sum(mejora[2] for mejora in values)
+    carga = sum(mejora[1] for mejora in values) + carga_base
+    consumo = sum(mejora[2] for mejora in values) + consumo_base
 
     autonomia = (carga/consumo)>= 50
     return autonomia

@@ -142,5 +142,3 @@ def planear_escaneo(tuneles, robots):
         if (action is not None):
             plan.append(action)
     return plan
-
-# ver 
